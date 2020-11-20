@@ -92,6 +92,7 @@ void loop()
     {
         if(blueToothSerial.available())   // Check if there's any data sent from the remote Bluetooth shield
         {
+            String allMoves = "";
             recvChar = blueToothSerial.read();
             Serial.print(recvChar); // print to local terminal
             // blueToothSerial.print(recvChar);
@@ -100,49 +101,31 @@ void loop()
             delay(50);
               if (recvChar == 'w') {
                 // move fwd
-//                sL.attach(13);
-//                sR.attach(12);
-//                delay(100);
+                allMoves += recvChar;
                 sL.writeMicroseconds(1700);
                 sR.writeMicroseconds(1300);
-//                delay(100);
-//                sL.detach();
-//                sR.detach();
               }
               else if (recvChar == 's') {
                 // move bwd
-//                sL.attach(13);
-//                sR.attach(12);
-//                delay(100);
+                allMoves += recvChar;
                 sL.writeMicroseconds(1300);
                 sR.writeMicroseconds(1700);
-//                delay(100);
-//                sL.detach();
-//                sR.detach();
               } else if (recvChar == 'd') {
                 // spin right
-//                sL.attach(13);
-//                sR.attach(12);
-//                delay(100);
                 sL.writeMicroseconds(1700);
                 sR.writeMicroseconds(1700);
-//                delay(100);
-//                sL.detach();
-//                sR.detach();
+                allMoves += recvChar;
               } else if (recvChar == 'a') {
                 // spin left
-//                sL.attach(13);
-//                sR.attach(12);
-//                delay(100);
                 sL.writeMicroseconds(1300);
                 sR.writeMicroseconds(1300);
-//                delay(100);
-//                sL.detach();
-//                sR.detach();
+                allMoves += recvChar;
               } else if (recvChar == 'q') {
                 // initiate IR sensor autonav
                 Serial.println("Ir nav");
                 irNav();
+              } else if (recvChar == 'm') {
+                  backwards(allMoves);
               }
               delay(50);
               sL.detach();
@@ -197,8 +180,7 @@ void irNav() {
       // spin right
       sL.writeMicroseconds(1700);
       sR.writeMicroseconds(1700);
-    }
-    else if (readingRight == 0) {
+    } else if (readingRight == 0) {
       // spin left
       sL.writeMicroseconds(1300);
       sR.writeMicroseconds(1300);
@@ -223,4 +205,20 @@ int irDetect(int irLedPin, int irRecvPin, long freq) {
   int ir = digitalRead(irRecvPin);
   delay(1);
   return ir;
+}
+
+void backwards(String allMoves) {
+    for (int i = 0; i < allMoves.length(); i++) {
+        char currentMove = allMoves.charAt(i);
+        if (currentMove == 'd') {
+            sR.write(1300);
+            sL.write(1300);
+        } else if (currentMove == 'a') {
+            sR.write(1700);
+            sL.write(1700);
+        } else if (currentMove == 'w') {
+            sL.write(1700);
+            sR.write(1300);
+        }
+    }
 }
